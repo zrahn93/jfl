@@ -1,0 +1,5 @@
+*__pycache__*
+jfl_gui/node_modules
+jfl_gui/package-lock.json
+jfl_gui/.expo
+jfl_gui/.expo_shared
