@@ -232,6 +232,16 @@ class Database:
 
         return results
 
+    def reset_picks(self, week, year):
+        cursor = self._db.cursor()
+        cursor.execute("UPDATE user_selections \
+                LEFT JOIN weeks ON weeks.week_id=user_selections.week_id \
+            SET user_selections.team_id = NULL \
+            WHERE weeks.number = %s AND weeks.year = %s;",
+            (week, year)
+        )
+        self._db.commit()
+
     def update_score(self, week, home_team, away_team, home_score, away_score, year=date.today().year):
         tie = False
         if home_score > away_score:

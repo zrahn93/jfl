@@ -108,9 +108,7 @@ class Drafter extends React.Component {
         var selectionStyle = {};
         var selection = null;
         if (pick[TEAM] != null) {
-            console.log(pick[TEAM])
             const selection_pic = require('../../assets/' + this.nfl_images[pick[TEAM]]);
-            console.log(selection_pic)
             selectionStyle = {
                 backgroundImage: `url(${selection_pic})`,
                 backgroundPosition: 'center',
@@ -238,7 +236,17 @@ class Drafter extends React.Component {
                     <h1>Available Teams</h1>
                     </div>
                     <div className="bids-container-card">
-                    {team_elements}
+                        {team_elements}
+                    </div>
+                    <div className="reset" onClick={() => {
+                        fetch('http://localhost:5000/api/reset_week', {
+                            method: 'POST',
+                            body: JSON.stringify({'week': _self.state.current_week})
+                        })
+                        .then(response => response.json())
+                        .then(() => {_self.getStateData();})
+                    }}>
+                        <button>Reset</button>
                     </div>
                 </div>
             </div>

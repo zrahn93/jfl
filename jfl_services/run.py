@@ -116,7 +116,6 @@ def generate_pick_team_response(args):
 
 
 def validate_team_data_request(params):
-    errors = []
     if params.get('team_id') is None:
         print("ERROR: no 'team_id' attribute found in request.")
         abort(400, f"Invalid Request: no 'team_id' attribute found in request.")
@@ -131,7 +130,6 @@ def generate_team_data_response(args):
 
 
 def validate_user_data_request(params):
-    errors = []
     if params.get('user_id') is None:
         print("ERROR: no 'user_id' attribute found in request.")
         abort(400, f"Invalid Request: no 'user_id' attribute found in request.")
@@ -143,6 +141,27 @@ def generate_user_data_response(args):
     '''
     response = get_db().get_user_info(args['user_id'])
     return jsonify(response)
+
+
+def validate_reset_week_request(params):
+    errors = []
+    if params.get('week') is None:
+        print("ERROR: no 'week' attribute found in request.")
+        abort(400, f"Invalid Request: no 'user_id' attribute found in request.")
+    if params.get('year') is None:
+        print("INFO: no 'year' attribute found in request. Adding the current year")
+        params['year'] = date.today().year
+
+    if len(errors) > 0:
+        error_message = '\n' + '\n\t'.join(errors)
+        abort(400, f"Invalid Request: {error_message}")
+
+def generate_reset_week_response(args):
+    '''
+    Returns a JSON response verifying the draft picks were reset
+    '''
+    response = get_db().reset_picks(args['week'], args['year'])
+    return jsonify({"success": True})
 
 
 @app.route('/api/current_week', methods=['GET'])
@@ -203,6 +222,16 @@ def api_user_data():
     request_args = dict(request.args)
     validate_user_data_request(request_args)
     return generate_user_data_response(request_args)
+
+
+@app.route('/api/reset_week', methods=['POST'])
+def api_reset_week():
+    '''
+    Route for the API to reset the draft picks for a week
+    '''
+    request_data = json.loads(request.data)
+    validate_reset_week_request(request_data)
+    return generate_reset_week_response(request_data)
 
 
 if __name__ == '__main__':
