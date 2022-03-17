@@ -402,3 +402,4 @@ if __name__ == '__main__':
             bye_weeks[w] = [users[i] for i in range(random.randint(0, 3))]
 
         db.create_drafts(bye_weeks)
+  

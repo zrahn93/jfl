@@ -108,7 +108,9 @@ class Drafter extends React.Component {
         var selectionStyle = {};
         var selection = null;
         if (pick[TEAM] != null) {
+            console.log(pick[TEAM])
             const selection_pic = require('../../assets/' + this.nfl_images[pick[TEAM]]);
+            console.log(selection_pic)
             selectionStyle = {
                 backgroundImage: `url(${selection_pic})`,
                 backgroundPosition: 'center',
@@ -117,21 +119,20 @@ class Drafter extends React.Component {
             selection = <p className='slider-card-selection'>{pick[TEAM]}</p>
         }
 
-        console.log(this.profile[pick[NAME]])
         const profile_pic = require('../../assets/user.png');
         var card = <div className='slider-card' >
-        <div className='slider-card' style={selectionStyle} >
-            <div className='opake-bg slider-card' >
-                <p className='slider-card-number'>{pick[PICK_NUM]}</p>
-                <div className="slider-img">
-                <img className='user-card-thumbnail' src={profile_pic} alt="centered image" />
+            <div className='slider-card' style={selectionStyle} >
+                <div className='opake-bg'>
+                    <p className='slider-card-number'>{pick[PICK_NUM]}</p>
+                    <div className="slider-img">
+                    <img className='user-card-thumbnail' src={profile_pic} alt="centered image" />
+                    </div>
+                    <Link to={`/profile/` + pick[USER_ID]}>
+                    <p className='slider-card-name'>{pick[NAME]}</p>
+                    </Link>
+                    <p className='slider-card-price'>{selection}</p>
                 </div>
-                <Link to={`/profile/` + pick[USER_ID]}>
-                <p className='slider-card-name'>{pick[NAME]}</p>
-                </Link>
-                <p className='slider-card-price'>{selection}</p>
             </div>
-        </div>
         </div>;
 
         div_components.push(card)
@@ -208,17 +209,17 @@ class Drafter extends React.Component {
                 <div className="bids-card">
                     <div className="bids-card-top">
                         <img src={team_logo} alt="" />
+                        <div className="bids-record-title">
+                            <p>({team.wins}-{team.losses}-{team.ties})</p>
+                        </div>
                         <Link to={`/post/` + team.team_id}>
                             <p className="bids-title">{team.team}</p>
                         </Link>
                     </div>
-                    <div className="bids-card-bottom break">
-                        <p>({team.wins}-{team.losses}-{team.ties})</p>
-                    </div>
-                    <div className="bids-card-bottom break">
+                    <div className="bids-card-bottom bids-opponent-title">
                         <p>{opponent_str}</p>
                     </div>
-                    <div className="bids-card-bottom">
+                    <div className="bids-odds-title">
                         <p>{spread_str}</p>
                     </div>
                     <div className="draft-selection">
@@ -239,9 +240,6 @@ class Drafter extends React.Component {
                     <div className="bids-container-card">
                     {team_elements}
                     </div>
-                </div>
-                <div className="load-more">
-                    <button>Load More</button>
                 </div>
             </div>
         )
