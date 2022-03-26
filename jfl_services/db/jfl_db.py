@@ -293,7 +293,7 @@ class Database:
 
     def get_user_info(self, user_id):
         cursor = self._db.cursor()
-        cursor.execute("SELECT weeks.number, users.user_id, users.name, teams.name, result \
+        cursor.execute("SELECT weeks.number, users.user_id, users.name, teams.team_id, teams.name, result \
             FROM user_selections \
                 LEFT JOIN users ON users.user_id=user_selections.user_id \
                 LEFT JOIN teams ON teams.team_id=user_selections.team_id \
@@ -310,9 +310,9 @@ class Database:
 
         if len(results) > 0:
             user_name = results[0][2]
-            wins = sum([1 for game in results if game[3] == 'win'])
-            losses = sum([1 for game in results if game[3] == 'loss'])
-            ties = sum([1 for game in results if game[3] == 'tie'])
+            wins = sum([1 for game in results if game[5] == 'win'])
+            losses = sum([1 for game in results if game[5] == 'loss'])
+            ties = sum([1 for game in results if game[5] == 'tie'])
             weeks = set([x[0] for x in results])
 
             weekly_results = []

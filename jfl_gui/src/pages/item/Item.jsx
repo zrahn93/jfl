@@ -47,8 +47,7 @@ function Item() {
   }
 
   async function getStateData(id) {
-    //TODO: params not workings
-    fetch('http://localhost:5000/api/team_data?team_id=' + id, {method: 'GET'})
+    fetch(process.env.REACT_APP_API_IP + '/api/team_data?team_id=' + id, {method: 'GET'})
     .then(response => response.json())
     .then(data => {
         console.log(data)

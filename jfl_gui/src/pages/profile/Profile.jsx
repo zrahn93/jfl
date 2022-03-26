@@ -48,8 +48,7 @@ const Profile = () => {
   }
 
   async function getStateData(id) {
-    //TODO: params not workings
-    fetch('http://localhost:5000/api/user_data?user_id=' + id, {method: 'GET'})
+    fetch(process.env.REACT_APP_API_IP + '/api/user_data?user_id=' + id, {method: 'GET'})
     .then(response => response.json())
     .then(data => {
         console.log(data)
@@ -78,16 +77,15 @@ const Profile = () => {
 
     for (var j = 0; j < week.length; j++) {
       var selection = week[j]
-      console.log(nfl_images[selection[3]])
       if (selection[3] != null) {
-        const team_pic = require('../../assets/' + nfl_images[selection[3]]);
+        const team_pic = require('../../assets/' + nfl_images[selection[4]]);
         games.push(
           <div className="card-column" >
-              <div className={"bids-card selection-win-" + selection[4]}>
+              <div className={"bids-card selection-win-" + selection[5]}>
                   <div className="bids-card-top">
                       <img src={team_pic} alt="" />
-                      <Link to={`/post/` + selection[1]}>
-                          <p className="bids-title">{selection[3]}</p>
+                      <Link to={`/post/` + selection[3]}>
+                          <p className="bids-title">{selection[4]}</p>
                       </Link>
                   </div>
               </div>

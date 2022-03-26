@@ -54,18 +54,18 @@ class Drafter extends React.Component {
     }
 
     async getStateData() {
-        fetch('http://localhost:5000/api/current_week', {method: 'GET'})
+        fetch(process.env.REACT_APP_API_IP + '/api/current_week', {method: 'GET'})
         .then(response => response.json())
         .then(week_data => {
             console.log("week_data: ")
             console.log(week_data)
             this.setState({current_week: week_data.current_week})
-            fetch('http://localhost:5000/api/draft_status?week=' + week_data.current_week, {method: 'GET'})
+            fetch(process.env.REACT_APP_API_IP + '/api/draft_status?week=' + week_data.current_week, {method: 'GET'})
             .then(response => response.json())
             .then(draft_data => {
                 console.log("draft_data: ")
                 console.log(draft_data)
-                fetch('http://localhost:5000/api/teams_playing?week=' + week_data.current_week, {method: 'GET'})
+                fetch(process.env.REACT_APP_API_IP + '/api/teams_playing?week=' + week_data.current_week, {method: 'GET'})
                 .then(response => response.json())
                 .then(team_data => {
                     console.log("team_data: ")
@@ -184,7 +184,7 @@ class Drafter extends React.Component {
             function() {
                 for (var j = 0; j < _self.state.draft_data.length; j++) {
                     if (_self.state.draft_data[j][DRAFT_SELECTION] == null) {
-                        fetch('http://localhost:5000/api/pick_team', {
+                        fetch(process.env.REACT_APP_API_IP + '/api/pick_team', {
                         method: 'POST',
                         body: JSON.stringify({
                             'user_id': _self.state.draft_data[j][USER_ID],
@@ -239,7 +239,7 @@ class Drafter extends React.Component {
                         {team_elements}
                     </div>
                     <div className="reset" onClick={() => {
-                        fetch('http://localhost:5000/api/reset_week', {
+                        fetch(process.env.REACT_APP_API_IP + '/api/reset_week', {
                             method: 'POST',
                             body: JSON.stringify({'week': _self.state.current_week})
                         })

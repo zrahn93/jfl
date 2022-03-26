@@ -26,6 +26,7 @@
 }
 .navbar-links_logo img{
   margin-right: 5px;
+  height: 50px;
 }
 .navbar-links_container{
   display: flex;
