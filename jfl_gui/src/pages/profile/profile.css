@@ -74,6 +74,15 @@
   flex:0.1;
   display: flex;
 }
+.selection-result-win{
+  background-color: rgba(67, 113, 67, 0.6) !important;
+}
+.selection-result-loss{
+  background-color: rgba(113, 67, 67, 0.6) !important;
+}
+.selection-result-tie{
+  background-color: rgba(112, 113, 67, 0.6) !important;
+}
 
 @media screen  and (max-width:1050px){
   .profile-pic img{

@@ -51,7 +51,7 @@ const Profile = () => {
     fetch(process.env.REACT_APP_API_IP + '/api/user_data?user_id=' + id, {method: 'GET'})
     .then(response => response.json())
     .then(data => {
-        console.log(data)
+        //console.log(data)
         set_user_name(data.user_name)
         set_draft_selections(data.draft_selections)
         set_wins(data.wins)
@@ -81,7 +81,7 @@ const Profile = () => {
         const team_pic = require('../../assets/' + nfl_images[selection[4]]);
         games.push(
           <div className="card-column" >
-              <div className={"bids-card selection-win-" + selection[5]}>
+              <div className={"bids-card selection-result-" + selection[6]}>
                   <div className="bids-card-top">
                       <img src={team_pic} alt="" />
                       <Link to={`/post/` + selection[3]}>

@@ -57,19 +57,19 @@ class Drafter extends React.Component {
         fetch(process.env.REACT_APP_API_IP + '/api/current_week', {method: 'GET'})
         .then(response => response.json())
         .then(week_data => {
-            console.log("week_data: ")
-            console.log(week_data)
+            //console.log("week_data: ")
+            //console.log(week_data)
             this.setState({current_week: week_data.current_week})
             fetch(process.env.REACT_APP_API_IP + '/api/draft_status?week=' + week_data.current_week, {method: 'GET'})
             .then(response => response.json())
             .then(draft_data => {
-                console.log("draft_data: ")
-                console.log(draft_data)
+                //console.log("draft_data: ")
+                //console.log(draft_data)
                 fetch(process.env.REACT_APP_API_IP + '/api/teams_playing?week=' + week_data.current_week, {method: 'GET'})
                 .then(response => response.json())
                 .then(team_data => {
-                    console.log("team_data: ")
-                    console.log(team_data)
+                    //console.log("team_data: ")
+                    //console.log(team_data)
                 this.setState({ 
                     current_week: week_data.current_week,
                     draft_data: draft_data,
@@ -172,9 +172,9 @@ class Drafter extends React.Component {
             const team = available_teams[i];
             const opponent_str = team.home ? "vs " + team.opponent : "at " + team.opponent;
             const team_logo = require('../../assets/' + this.nfl_images[team.team]);
-            team.wins = (team.wins == null) ? 0 : team.wins
-            team.losses = (team.losses == null) ? 0 : team.losses
-            team.ties = (team.ties == null) ? 0 : team.ties
+            const wins = (team.wins == null) ? 0 : team.wins
+            const losses = (team.losses == null) ? 0 : team.losses
+            const ties = (team.ties == null) ? 0 : team.ties
 
             var spread_str = "-"
             if (team.odds != null)
@@ -208,7 +208,7 @@ class Drafter extends React.Component {
                     <div className="bids-card-top">
                         <img src={team_logo} alt="" />
                         <div className="bids-record-title">
-                            <p>({team.wins}-{team.losses}-{team.ties})</p>
+                            <p>({wins}-{losses}-{ties})</p>
                         </div>
                         <Link to={`/post/` + team.team_id}>
                             <p className="bids-title">{team.team}</p>
@@ -239,14 +239,54 @@ class Drafter extends React.Component {
                         {team_elements}
                     </div>
                     <div className="reset" onClick={() => {
-                        fetch(process.env.REACT_APP_API_IP + '/api/reset_week', {
+                        fetch('http://localhost:5000/api/reset_week', {
                             method: 'POST',
                             body: JSON.stringify({'week': _self.state.current_week})
                         })
                         .then(response => response.json())
                         .then(() => {_self.getStateData();})
                     }}>
-                        <button>Reset</button>
+                        <button>Clear Draft Picks</button>
+                    </div>
+                    <div className="sim-games" onClick={() => {
+                        var all_teams_picked = true;
+                        for (var j = 0; j < _self.state.draft_data.length; j++) {
+                            if (_self.state.draft_data[j][DRAFT_SELECTION] == null) {
+                                all_teams_picked = false;
+                            }
+                        }
+                        if (all_teams_picked) {
+                            fetch('http://localhost:5000/api/sim_games', {
+                                method: 'POST',
+                                body: JSON.stringify({'week': _self.state.current_week})
+                            })
+                            .then(response => response.json())
+                            .then(() => {_self.getStateData();})
+                        } else {
+                            alert("Not all teams selected! Go with the Best Bird Available");
+                        }
+                    }}>
+                        <button>Simulate Game Results</button>
+                    </div>
+                    <div className="complete-week" onClick={() => {
+                        var all_teams_picked = true;
+                        for (var j = 0; j < _self.state.draft_data.length; j++) {
+                            if (_self.state.draft_data[j][DRAFT_SELECTION] == null) {
+                                all_teams_picked = false;
+                            }
+                        }
+                        if (all_teams_picked) {
+                            fetch('http://localhost:5000/api/complete_week', {
+                                method: 'POST',
+                                body: JSON.stringify({'week': _self.state.current_week})
+                            })
+                            .then(response => response.json())
+                            .then(() => {_self.getStateData();})
+                        } else {
+                            alert("Not all teams selected! Go with the Best Bird Available");
+                        }
+                    }}>
+                        <button>Complete Week</button>
                     </div>
                 </div>
             </div>

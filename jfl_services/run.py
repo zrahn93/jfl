@@ -144,7 +144,51 @@ def generate_user_data_response(args):
     return jsonify(response)
 
 
+def validate_complete_week_request(params):
+    errors = []
+    if params.get('week') is None:
+        print("ERROR: no 'week' attribute found in request.")
+        abort(400, f"Invalid Request: no 'week' attribute found in request.")
+    if params.get('year') is None:
+        print("INFO: no 'year' attribute found in request. Adding the current year")
+        params['year'] = date.today().year
+
+    if len(errors) > 0:
+        error_message = '\n' + '\n\t'.join(errors)
+        abort(400, f"Invalid Request: {error_message}")
+
+
+def generate_complete_week_response(args):
+    '''
+    Returns a JSON response verifying the week was completed
+    '''
+    response = get_db().complete_week(args['week'], args['year'])
+    return jsonify({"success": True})
+
+
 def validate_reset_week_request(params):
+    errors = []
+    if params.get('week') is None:
+        print("ERROR: no 'week' attribute found in request.")
+        abort(400, f"Invalid Request: no 'week' attribute found in request.")
+    if params.get('year') is None:
+        print("INFO: no 'year' attribute found in request. Adding the current year")
+        params['year'] = date.today().year
+
+    if len(errors) > 0:
+        error_message = '\n' + '\n\t'.join(errors)
+        abort(400, f"Invalid Request: {error_message}")
+
+
+def generate_reset_week_response(args):
+    '''
+    Returns a JSON response verifying the draft picks were reset
+    '''
+    response = get_db().reset_picks(args['week'], args['year'])
+    return jsonify({"success": True})
+
+
+def validate_sim_games_request(params):
     errors = []
     if params.get('week') is None:
         print("ERROR: no 'week' attribute found in request.")
@@ -157,11 +201,12 @@ def validate_reset_week_request(params):
         error_message = '\n' + '\n\t'.join(errors)
         abort(400, f"Invalid Request: {error_message}")
 
-def generate_reset_week_response(args):
+
+def generate_sim_games_response(args):
     '''
-    Returns a JSON response verifying the draft picks were reset
+    Returns a JSON response verifying the games were simulated for the week
     '''
-    response = get_db().reset_picks(args['week'], args['year'])
+    response = get_db().sim_week(args['week'], args['year'])
     return jsonify({"success": True})
 
 
@@ -225,6 +270,16 @@ def api_user_data():
     return generate_user_data_response(request_args)
 
 
+@app.route('/api/complete_week', methods=['POST'])
+def api_complete_week():
+    '''
+    Route for the API to complete the week and move to the next week
+    '''
+    request_data = json.loads(request.data)
+    validate_complete_week_request(request_data)
+    return generate_complete_week_response(request_data)
+
+
 @app.route('/api/reset_week', methods=['POST'])
 def api_reset_week():
     '''
@@ -233,6 +288,16 @@ def api_reset_week():
     request_data = json.loads(request.data)
     validate_reset_week_request(request_data)
     return generate_reset_week_response(request_data)
+
+
+@app.route('/api/sim_games', methods=['POST'])
+def api_sim_games():
+    '''
+    Route for the API to sim the games for a week
+    '''
+    request_data = json.loads(request.data)
+    validate_sim_games_request(request_data)
+    return generate_sim_games_response(request_data)
 
 
 if __name__ == '__main__':

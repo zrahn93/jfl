@@ -2,7 +2,7 @@
 ### Welcome to the Jeff Fisher League
 
 This repository contains source code for a ReactJS website running a Flask web server.
-The application is containerized for hosting in AWS
+The application is containerized for hosting in the cloud
 Future: Several Lambda functions query information from NFL & FanDuel APIs
 
 ## Installation
@@ -29,11 +29,21 @@ To run the front end:
 
 To containerize and run with docker:
 ```bash
-    docker build -t jfl .
-    docker run --rm -d --network host jfl
+    docker run -p 3306:3306 -v mysql-volume:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql/mysql-server
+    cd jfl_services
+    docker build -t jfl_services .
+    docker run --rm -d --network host jfl_services
+    cd ../jfl_gui
+    docker build -t jfl_gui .
+    docker run --rm -d --network host --env REACT_APP_API_IP=http://localhost:5000 jfl_gui
 ```
 
 ### TODO:
-APIs & Lambda functions
-Docker containers
-Team selection with GIFs: nice to have
+* Create League page
+* Create Standings page
+* NFL team page updates
+* Update results to include scores
+* APIs & Lambda functions
+* Profiles
+* Notifications: nice to have
+* Team selection with GIFs: nice to have

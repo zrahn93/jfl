@@ -50,7 +50,7 @@ function Item() {
     fetch(process.env.REACT_APP_API_IP + '/api/team_data?team_id=' + id, {method: 'GET'})
     .then(response => response.json())
     .then(data => {
-        console.log(data)
+        //console.log(data)
         set_team_name(data[0])
         set_team_image(nfl_images[data[0]])
         set_wins(data[1])

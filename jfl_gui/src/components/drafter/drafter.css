@@ -109,6 +109,42 @@ font-weight: normal;
   font-size: 14px;
   line-height: 21px;
 }
+.sim-games{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2rem;
+}
+.sim-games button{
+  background: transparent;
+  border: 1px solid #919191;
+  margin: 0 1rem;
+  color: #919191;
+  border-radius: 10px;
+  padding: 10px 100px;
+  font-family: Poppins;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 21px;
+}
+.complete-week{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2rem;
+}
+.complete-week button{
+  background: transparent;
+  border: 1px solid #2a8562;
+  margin: 0 1rem;
+  color: #2a8562;
+  border-radius: 10px;
+  padding: 10px 100px;
+  font-family: Poppins;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 21px;
+}
 .draft-selection{
   display: flex;
   justify-content: center;

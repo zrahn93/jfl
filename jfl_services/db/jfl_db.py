@@ -178,17 +178,76 @@ class Database:
     def get_teams_playing(self, week, year):
         cursor = self._db.cursor()
         cursor.execute(" \
-            SELECT home_team.team_id, home_team.name,  home_odds, away_team.team_id, away_team.name, away_odds \
+            SELECT home_team_id, home_team.name,  home_odds, away_team_id, away_team.name, away_odds \
             FROM games \
                 LEFT JOIN teams home_team ON home_team.team_id=games.home_team_id \
                 LEFT JOIN teams away_team ON away_team.team_id=games.away_team_id \
             WHERE games.week_id = (SELECT week_id FROM weeks WHERE number = %s AND year = %s);", (week, year))
         matchups = cursor.fetchall()
 
+        team_ids = set()
+        for matchup in matchups:
+            team_ids.add(str(matchup[0]))
+            team_ids.add(str(matchup[3]))
+        team_ids = ','.join(team_ids)
+
+        cursor.execute("SELECT home_team_id, away_team_id, winning_team_id, losing_team_id, tie \
+            FROM games WHERE home_team_id IN (%s) OR away_team_id IN (%s);" % (team_ids, team_ids)
+        )
+        season_games = cursor.fetchall()
+
         teams = []
-        for game in matchups:
-            teams.append({'team_id': game[0], 'team': game[1], 'odds': game[2], 'opponent': game[4], 'home': True})
-            teams.append({'team_id': game[3], 'team': game[4], 'odds': game[5], 'opponent': game[1], 'home': False})
+        for matchup in matchups:
+            home_games = [g for g in season_games if str(matchup[0]) == str(g[0])] #home wins
+            away_games = [g for g in season_games if str(matchup[0]) == str(g[1])] #away wins
+            wins = (
+                len([g for g in home_games if str(matchup[0]) == str(g[2])]) + 
+                len([g for g in away_games if str(matchup[0]) == str(g[2])])
+            )
+            losses = (
+                len([g for g in home_games if str(matchup[0]) == str(g[3])]) + 
+                len([g for g in away_games if str(matchup[0]) == str(g[3])])
+            )
+            ties = (
+                len([g for g in home_games if g[4] == 1]) + 
+                len([g for g in away_games if g[4] == 1])
+            )
+            teams.append({
+                'team_id': matchup[0],
+                'team': matchup[1],
+                'odds': matchup[2],
+                'opponent': matchup[4],
+                'wins': wins,
+                'losses': losses,
+                'ties': ties,
+                'home': True
+            })
+
+            #Away team
+            home_games = [g for g in season_games if str(matchup[3]) == str(g[0])] #home wins
+            away_games = [g for g in season_games if str(matchup[3]) == str(g[1])] #away wins
+            wins = (
+                len([g for g in home_games if str(matchup[3]) == str(g[2])]) + 
+                len([g for g in away_games if str(matchup[3]) == str(g[2])])
+            )
+            losses = (
+                len([g for g in home_games if str(matchup[3]) == str(g[3])]) + 
+                len([g for g in away_games if str(matchup[3]) == str(g[3])])
+            )
+            ties = (
+                len([g for g in home_games if g[4] == 1]) + 
+                len([g for g in away_games if g[4] == 1])
+            )
+            teams.append({
+                'team_id': matchup[3],
+                'team': matchup[4],
+                'odds': matchup[5],
+                'opponent': matchup[1],
+                'wins': wins,
+                'losses': losses,
+                'ties': ties,
+                'home': False
+            })
 
         return teams
 
@@ -234,6 +293,15 @@ class Database:
 
     def reset_picks(self, week, year):
         cursor = self._db.cursor()
+
+        cursor.execute("UPDATE games \
+                LEFT JOIN weeks ON weeks.week_id=games.week_id \
+            SET games.winning_team_id = NULL, losing_team_id = NULL, home_score = NULL, away_score = NULL, tie = NULL \
+            WHERE weeks.number = %s AND weeks.year = %s;",
+            (week, year)
+        )
+        self._db.commit()
+
         cursor.execute("UPDATE user_selections \
                 LEFT JOIN weeks ON weeks.week_id=user_selections.week_id \
             SET user_selections.team_id = NULL \
@@ -242,37 +310,64 @@ class Database:
         )
         self._db.commit()
 
+    def sim_week(self, week, year):
+        cursor = self._db.cursor()
+        cursor.execute("SELECT game_id, home_team.name,  away_team.name \
+            FROM games \
+                LEFT JOIN weeks ON weeks.week_id=games.week_id \
+                LEFT JOIN teams home_team ON home_team.team_id=games.home_team_id \
+                LEFT JOIN teams away_team ON away_team.team_id=games.away_team_id \
+            WHERE weeks.number = %s AND weeks.year = %s;",
+            (week, year)
+        )
+        results = cursor.fetchall()
+
+        for game_info in results:
+            home_score = random.randint(17, 31)
+            away_score = random.randint(14, 30)
+            self.update_score(week, game_info[1], game_info[2], home_score, away_score, year)
+
     def update_score(self, week, home_team, away_team, home_score, away_score, year=date.today().year):
+        cursor = self._db.cursor()
+        cursor.execute("SELECT team_id, name \
+            FROM teams \
+            WHERE name IN (%s, %s) AND year = %s;",
+            (home_team, away_team, year)
+        )
+        results = cursor.fetchall()
+        home_team_id = [team for team in results if team[1] == home_team][0][0]
+        away_team_id = [team for team in results if team[1] == away_team][0][0]
+
         tie = False
         if home_score > away_score:
-            winning_team = home_team
-            losing_team = away_team
+            winning_team_id = home_team_id
+            losing_team_id = away_team_id
         elif home_score < away_score:
-            winning_team = away_team
-            losing_team = home_team
+            winning_team_id = away_team_id
+            losing_team_id = home_team_id
         else:
             tie = True
             prefix = "SET tie = 1"
 
         if not tie:
-            prefix = "SET winning_team = %s, losing_team = %s, tie = 0" % (winning_team, losing_team)
+            prefix = "SET winning_team_id = %s, losing_team_id = %s, tie = 0" % (winning_team_id, losing_team_id)
 
-        prefix += "home_score = %d, away_score = %d" % (home_score, away_score)
-        cursor = self._db.cursor()
-        cursor.execute("UPDATE games \
-            %s \
+        prefix += ", home_score = %d, away_score = %d" % (home_score, away_score)
+
+        query = f"UPDATE games \
+            {prefix} \
             WHERE ( \
-                week_id = (SELECT week_id FROM weeks WHERE number = %s AND year = %s)[0] AND \
-                home_team_id = (SELECT team_id FROM teams WHERE name = %s)[0] AND \
-                away_team_id = (SELECT team_id FROM teams WHERE name = %s)[0] \
-            );",
-            (prefix, week, year, home_team, away_team)
-        )
+                week_id = (SELECT week_id FROM weeks WHERE number = %s AND year = %s) AND \
+                home_team_id = %s AND \
+                away_team_id = %s \
+            );"
+
+        cursor.execute(query, (week, year, home_team_id, away_team_id))
         self._db.commit()
 
     def complete_week(self, number, year):
         cursor = self._db.cursor()
-        cursor.execute("UPDATE games \
+        cursor.execute("UPDATE weeks \
             SET complete = 1 \
             WHERE (number = %s AND year = %s);",
             (number, year)
@@ -283,41 +378,77 @@ class Database:
     def get_team_info(self, team_id):
         cursor = self._db.cursor()
         cursor.execute("SELECT name FROM teams WHERE team_id = %s;", (team_id,))
+        team_name = cursor.fetchall()[0][0]
+
+        cursor.execute("SELECT winning_team_id, losing_team_id, tie \
+            FROM games WHERE home_team_id = %s OR away_team_id = %s;",
+            (team_id, team_id)
+        )
         results = cursor.fetchall()
 
-        # Simulate win/loss/tie data
-        results = (results[0][0], 0, 0, 0)
+        wins = len([game for game in results if str(game[0]) == str(team_id)])
+        losses = len([game for game in results if str(game[1]) == str(team_id)])
+        ties = len([game for game in results if game[2] == 1])
+
+        results = (team_name, wins, losses, ties)
+
+        # Get schedule with wins & losses
 
         return results
 
 
-    def get_user_info(self, user_id):
+    def get_user_info(self, user_id, year=date.today().year):
         cursor = self._db.cursor()
-        cursor.execute("SELECT weeks.number, users.user_id, users.name, teams.team_id, teams.name, result \
+        # Get all of the user's selections
+        cursor.execute("SELECT weeks.number, users.user_id, users.name, teams.team_id, teams.name, weeks.week_id \
             FROM user_selections \
                 LEFT JOIN users ON users.user_id=user_selections.user_id \
                 LEFT JOIN teams ON teams.team_id=user_selections.team_id \
                 LEFT JOIN weeks ON weeks.week_id=user_selections.week_id \
-            WHERE users.user_id = %s;", (user_id,)
+            WHERE users.user_id = %s AND weeks.year = %s;", (user_id, year)
+        )
+        selections = cursor.fetchall()
+
+        # Get wins/losses of those selections
+        picks = [{"team_id": info[3], "week": info[5], 'info': info} for info in selections if info[3] is not None]
+        team_ids = {str(info[3]) for info in selections if info[3] is not None}
+        team_ids = ','.join(team_ids)
+
+        cursor.execute("SELECT week_id, home_team_id, away_team_id, winning_team_id, losing_team_id, tie \
+            FROM games \
+            WHERE home_team_id IN (%s) OR away_team_id IN (%s);" % (team_ids, team_ids)
         )
         results = cursor.fetchall()
 
-        user_name = None
-        draft_selections = None
         wins = 0
         losses = 0
         ties = 0
 
-        if len(results) > 0:
-            user_name = results[0][2]
-            wins = sum([1 for game in results if game[5] == 'win'])
-            losses = sum([1 for game in results if game[5] == 'loss'])
-            ties = sum([1 for game in results if game[5] == 'tie'])
-            weeks = set([x[0] for x in results])
+        pick_results = []
+        for pick in picks:
+            for result in results:
+                if pick["week"] == result[0] and pick["team_id"] in [result[1], result[2]]:
+                    pick["info"] = list(pick["info"])
+                    if pick["team_id"] == result[3]:
+                        wins += 1
+                        pick["info"].append('win')
+                    elif pick["team_id"] == result[4]:
+                        losses += 1
+                        pick["info"].append('loss')
+                    elif result[5] == 1:
+                        ties += 1
+                        pick["info"].append('tie')
+                    break
 
-            weekly_results = []
+        user_name = None
+        weekly_results = []
+
+        if len(picks) > 0:
+            user_name = picks[0]["info"][2]
+            weeks = set([x["info"][0] for x in picks])
+
             for week in weeks:
-                games = [game for game in results if game[0] == week]
+                games = [game["info"] for game in picks if game["info"][0] == week]
                 # Checking if all the selections are the same (only true when all None)
                 if games.count(games[0][3]) != len(games):
                     weekly_results.append(games)
