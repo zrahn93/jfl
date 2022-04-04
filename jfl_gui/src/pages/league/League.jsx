@@ -3,7 +3,7 @@ import './league.css'
 import { Link } from 'react-router-dom';
 
 const League = () => {
-  const [season_selections, set_season_selections] = useState({})
+  const [season_selections, set_season_selections] = useState([])
 
   const nfl_images = {
     "Arizona Cardinals": "nfl-arizona-cardinals-team-logo-2.png",
@@ -50,11 +50,12 @@ const League = () => {
     );
   }
 
-  if (Object.keys(season_selections).length === 0)
+  if (season_selections.length === 0)
     getStateData();
 
     var season_elements = []
-    for (const [week_id, week_results] of Object.entries(season_selections)){
+    for (var i = 0; i < season_selections.length; i++){
+        var week_results = season_selections[i];
         var week_elements = []
         for (const [user_name, user_results] of Object.entries(week_results['users'])) {
             var games = []
@@ -100,7 +101,7 @@ const League = () => {
         }
         if (week_elements.length > 0) {
             season_elements.push(
-                <div id={week_id} className='league section__padding'>
+                <div id={week_results['week_id']} className='league section__padding'>
                     <div className="league-container">
                         <div className="league-container-week">
                         <h1>Week {week_results['week']}</h1>
