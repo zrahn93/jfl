@@ -613,6 +613,7 @@ if __name__ == '__main__':
         bye_weeks = {}
         for w in weeks:
             random.shuffle(users)
-            bye_weeks[w] = [users[i] for i in range(random.randint(0, 3))]
+            num_byes = 3 if w < 3 else 4
+            bye_weeks[w] = users[:num_byes]
 
         db.create_drafts(bye_weeks)
