@@ -57,10 +57,12 @@ const League = () => {
     for (var i = 0; i < season_selections.length; i++){
         var week_results = season_selections[i];
         var week_elements = []
-        for (const [user_name, user_results] of Object.entries(week_results['users'])) {
+        console.log(week_results)
+        for (var j = 0; j < week_results["users"].length; j++) {
+            var user_results = week_results["users"][j];
             var games = []
-
             if (user_results.length > 0) {
+                var user_name = user_results[0][2];
                 for (var idx = 0; idx < user_results.length; idx++) {
                     var selection = user_results[idx];
                     if (selection[3] != null) {

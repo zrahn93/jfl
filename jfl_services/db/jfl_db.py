@@ -385,15 +385,18 @@ class Database:
         results = []
         for week in weeks:
             weekly_selections = self.get_current_picks(week[1], year)
-            weekly_results = { "week_id": week[0], "week": week[1], "users": {} }
+            weekly_results = { "week_id": week[0], "week": week[1], "users": [] }
             # user_selections.draft_order, users.user_id, users.name, teams.team_id, teams.name
             users = {x[2] for x in weekly_selections}
             for user in users:
                 user_selections = [x for x in weekly_selections if x[2] == user]
-                weekly_results["users"][user] = user_selections
+                weekly_results["users"].append(user_selections)
 
+            # Sort by draft order
+            weekly_results["users"] = sorted(weekly_results["users"], key=lambda x: x[0])
             results.append(weekly_results)
 
+        # Sort by reverse week
         results = sorted(results, key=lambda x: x['week_id'], reverse=True)
     
         return results

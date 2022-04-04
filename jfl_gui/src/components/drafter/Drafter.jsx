@@ -117,6 +117,7 @@ class Drafter extends React.Component {
             selection = <p className='slider-card-selection'>{pick[TEAM]}</p>
         }
 
+        //TODO: some team names fall out of the slider-card... Maybe force the text to two rows
         const profile_pic = require('../../assets/user.png');
         var card = <div className='slider-card' >
             <div className='slider-card' style={selectionStyle} >
