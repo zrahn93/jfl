@@ -22,13 +22,14 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 200px;
+  width: 100% !important;
   margin-top: -100px;
 }
 .profile-pic img{
   border: 6px solid var(--color-bg);
   border-radius: 50%;
- width: 70%;
+  width: 140px !important;
+  height: 140px;
 }
 .profile-pic h3{
   font-family: var(--font-family);
@@ -73,15 +74,6 @@
   color: whitesmoke;
   flex:0.1;
   display: flex;
-}
-.selection-result-win{
-  background-color: rgba(67, 113, 67, 0.6) !important;
-}
-.selection-result-loss{
-  background-color: rgba(113, 67, 67, 0.6) !important;
-}
-.selection-result-tie{
-  background-color: rgba(112, 113, 67, 0.6) !important;
 }
 
 @media screen  and (max-width:1050px){
@@ -139,7 +131,7 @@
 }
 .card-column{
   float: left;
-  width: 20%;
+  width: 25%;
 }
 .bids-card{
   background: #2A2D3A;

@@ -86,8 +86,8 @@ class Drafter extends React.Component {
         dots: false, infinite: false, speed: 500, slidesToShow: 5, slidesToScroll: 1, swipeToSlide:true,
         responsive: [
         { breakpoint: 1160, settings: { slidesToShow: 4, slidesToScroll: 1, swipeToSlide:true } },
-        { breakpoint: 950, settings: { slidesToShow: 3, slidesToScroll: 1, swipeToSlide:true, } },
-        { breakpoint: 750, settings: { slidesToShow: 2, slidesToScroll: 1, } },
+        { breakpoint: 950, settings: { slidesToShow: 4, slidesToScroll: 1, swipeToSlide:true, } },
+        { breakpoint: 825, settings: { slidesToShow: 3, slidesToScroll: 1, } },
         { breakpoint: 550, settings: { slidesToShow: 3, slidesToScroll: 1 } },
         { breakpoint: 470, settings: { slidesToShow: 2, slidesToScroll: 1, } },
         { breakpoint: 400, settings: { slidesToShow: 2, slidesToScroll: 1, variableWidth: true, } }
@@ -185,13 +185,13 @@ class Drafter extends React.Component {
                 for (var j = 0; j < _self.state.draft_data.length; j++) {
                     if (_self.state.draft_data[j][DRAFT_SELECTION] == null) {
                         fetch(process.env.REACT_APP_API_IP + '/api/pick_team', {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            'user_id': _self.state.draft_data[j][USER_ID],
-                            'week': _self.state.current_week,
-                            'pick': _self.state.draft_data[j][DRAFT_PICK],
-                            'team': team.team
-                        })
+                            method: 'POST',
+                            body: JSON.stringify({
+                                'user_id': _self.state.draft_data[j][USER_ID],
+                                'week': _self.state.current_week,
+                                'pick': _self.state.draft_data[j][DRAFT_PICK],
+                                'team': team.team
+                            })
                         })
                         .then(response => response.json())
                         .then(() => {
@@ -250,8 +250,8 @@ class Drafter extends React.Component {
                     </div>
                     <div className="sim-games" onClick={() => {
                         var all_teams_picked = true;
-                        for (var j = 0; j < _self.state.draft_data.length; j++) {
-                            if (_self.state.draft_data[j][DRAFT_SELECTION] == null) {
+                        for (var i = 0; i < _self.state.draft_data.length; i++) {
+                            if (_self.state.draft_data[i][DRAFT_SELECTION] == null) {
                                 all_teams_picked = false;
                             }
                         }
@@ -269,21 +269,22 @@ class Drafter extends React.Component {
                         <button>Simulate Game Results</button>
                     </div>
                     <div className="complete-week" onClick={() => {
-                        var all_teams_picked = true;
-                        for (var j = 0; j < _self.state.draft_data.length; j++) {
-                            if (_self.state.draft_data[j][DRAFT_SELECTION] == null) {
-                                all_teams_picked = false;
+                        var all_games_finished = true
+                        for (var i = 0; i < _self.state.team_data.length; i++) {
+                            if (!_self.state.team_data[i]["finished"]) {
+                                all_games_finished = false;
                             }
                         }
-                        if (all_teams_picked) {
+                        if (!all_games_finished) {
+                            alert("Not all games finished! Smash that 'Simulate Game Results' button");
+                        }
+                        else {
                             fetch('http://localhost:5000/api/complete_week', {
                                 method: 'POST',
                                 body: JSON.stringify({'week': _self.state.current_week})
                             })
                             .then(response => response.json())
                             .then(() => {_self.getStateData();})
-                        } else {
-                            alert("Not all teams selected! Go with the Best Bird Available");
                         }
                     }}>
                         <button>Complete Week</button>

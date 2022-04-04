@@ -1,0 +1,223 @@
+.profile{
+    padding:  0;
+    /* padding-bottom: 6rem; */
+  }
+  .profile-top{
+    position: relative;
+    padding-bottom: 3.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .profile-banner{
+    width: 100%;
+  }
+  .profile-banner img{
+    width: 100%;
+    object-fit: cover;
+  }
+  .profile-pic{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 200px;
+    margin-top: -100px;
+  }
+  .profile-pic img{
+    border: 6px solid var(--color-bg);
+    border-radius: 50%;
+   width: 70%;
+  }
+  .profile-pic h3{
+    font-family: var(--font-family);
+    font-weight: 600;
+    font-size: 28px;
+    line-height: 42px;
+    text-align: center;
+    color: #FFFFFF;
+  }
+  .profile-pic h4{
+    font-family: var(--font-family);
+    font-weight: 300;
+    font-size: 24px;
+    line-height: 36px;
+    text-align: center;
+    color: #FFFFFF;
+  }
+  .profile-bottom-input{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .profile-bottom-input input{
+    background: #1B1A21;
+    border-radius: 10px;
+    border: none;
+    padding: 7px 19px 7px 15px;
+    font-family: var(--font-family);
+    outline: none;
+    color: whitesmoke;
+    flex:0.3;
+    display: flex;
+    margin-right: 1rem;
+  }
+  .profile-bottom-input select{
+    background: #1B1A21;
+    border-radius: 10px;
+    border: none;
+    padding: 7px 19px 7px 15px;
+    font-family: var(--font-family);
+    outline: none;
+    color: whitesmoke;
+    flex:0.1;
+    display: flex;
+  }
+  .selection-result-win{
+    background-color: rgba(67, 113, 67, 0.6) !important;
+  }
+  .selection-result-loss{
+    background-color: rgba(113, 67, 67, 0.6) !important;
+  }
+  .selection-result-tie{
+    background-color: rgba(112, 113, 67, 0.6) !important;
+  }
+  
+  @media screen  and (max-width:1050px){
+    .profile-pic img{
+      width: 50%;
+    }
+    .profile-pic{
+      margin-top: -50px;
+    }
+  
+  }
+  @media screen  and (max-width:550px){
+    .profile-pic h3{
+      font-weight: 600;
+      font-size: 20px;
+      line-height: 30px;
+    }
+    .profile.section__padding{
+      padding: 1rem 0px !important;
+    }
+  }
+  @media screen  and (max-width:500px){
+    .profile-bottom-input {
+      display: none;
+    }
+    .profile-top{
+      padding-bottom: 1rem;
+    }
+  }
+  
+  
+  .league-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+    width: 90%;
+  }
+  .league-container-week h1{
+    font-family: var(--font-family);
+    font-weight: 600;
+    font-size: 28px;
+    line-height: 42px;
+    color: #FFFFFF;
+    margin-bottom: 1rem;
+  }
+  .league-container-user {
+    width:100%;
+    text-align:left;
+  }
+  .league-container-user h3{
+    font-family: var(--font-family);
+    font-weight: 500;
+    font-size: 22px;
+    line-height: 32px;
+    color: #FFFFFF;
+    margin-bottom: 1rem;
+    width:100%;
+  }
+  .league-container-card{
+    margin: 0 -5px;
+  }
+  .league-container-card:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+  .league-card-column{
+    float: left;
+    width: 25% !important;
+  }
+  .league-card{
+    background: #2A2D3A;
+    border-radius: 20px;
+    padding: 11px 12px 19px 11px;
+    margin-inline: 10px;
+    margin-bottom: 20px;
+  }
+  .league-card img{
+    border-radius: 20px;
+    width: 100%;
+  }
+  .league-card-top p{
+    font-family: var(--font-family);
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 21px;
+    color: #FFFFFF;
+    margin-top: 15px;
+  }
+  .league-card-bottom{
+    display: flex;
+    justify-content: space-between;
+  }
+  .league-card-bottom p{
+    font-family: var(--font-family);
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 18px;
+  /* text-align: right; */
+  color: #FFFFFF;
+  }
+  .league-card-bottom p:last-child{
+  font-weight: normal;
+  
+  }
+  .league-card-bottom span{
+  font-weight: normal;
+  }
+
+  .team-title{
+    line-height: 21px;
+    height: 42px;
+  }
+
+  @media screen and (max-width: 550px) {
+    .section__padding{
+      padding: 2rem 14px !important;
+    }
+    .league-card{
+      margin-bottom: 10px;
+      margin-inline: 5px;
+    }
+    .league-card-top p{
+      font-size: 12px;
+      line-height: 18px;
+      margin-top: 5px;
+    }
+    .league-card-bottom p{
+      font-size: 10px;
+      line-height: 15px;
+    }
+    .league-container{
+      width: 100%;
+    }
+  
+  }
+  

@@ -39,8 +39,6 @@ To containerize and run with docker:
 ```
 
 ### TODO:
-* Create League page
-* Create Standings page
 * NFL team page updates
 * Update results to include scores
 * APIs & Lambda functions
