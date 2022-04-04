@@ -239,7 +239,7 @@ class Drafter extends React.Component {
                         {team_elements}
                     </div>
                     <div className="reset" onClick={() => {
-                        fetch('http://localhost:5000/api/reset_week', {
+                        fetch(process.env.REACT_APP_API_IP + '/api/reset_week', {
                             method: 'POST',
                             body: JSON.stringify({'week': _self.state.current_week})
                         })
@@ -256,7 +256,7 @@ class Drafter extends React.Component {
                             }
                         }
                         if (all_teams_picked) {
-                            fetch('http://localhost:5000/api/sim_games', {
+                            fetch(process.env.REACT_APP_API_IP + '/api/sim_games', {
                                 method: 'POST',
                                 body: JSON.stringify({'week': _self.state.current_week})
                             })
@@ -279,7 +279,7 @@ class Drafter extends React.Component {
                             alert("Not all games finished! Smash that 'Simulate Game Results' button");
                         }
                         else {
-                            fetch('http://localhost:5000/api/complete_week', {
+                            fetch(process.env.REACT_APP_API_IP + '/api/complete_week', {
                                 method: 'POST',
                                 body: JSON.stringify({'week': _self.state.current_week})
                             })
