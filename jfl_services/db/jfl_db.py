@@ -178,7 +178,8 @@ class Database:
     def get_teams_playing(self, week, year):
         cursor = self._db.cursor()
         cursor.execute(" \
-            SELECT home_team_id, home_team.name,  home_odds, away_team_id, away_team.name, away_odds \
+            SELECT home_team_id, home_team.name,  home_odds, away_team_id, away_team.name, away_odds, \
+                   home_score, away_score \
             FROM games \
                 LEFT JOIN teams home_team ON home_team.team_id=games.home_team_id \
                 LEFT JOIN teams away_team ON away_team.team_id=games.away_team_id \
@@ -220,7 +221,8 @@ class Database:
                 'wins': wins,
                 'losses': losses,
                 'ties': ties,
-                'home': True
+                'home': True,
+                'finished': matchup[6] is not None and matchup[7] is not None
             })
 
             #Away team
@@ -246,7 +248,8 @@ class Database:
                 'wins': wins,
                 'losses': losses,
                 'ties': ties,
-                'home': False
+                'home': False,
+                'finished': matchup[6] is not None and matchup[7] is not None
             })
 
         return teams
@@ -374,6 +377,47 @@ class Database:
         )
         self._db.commit()
 
+    def get_season_selections(self, year):
+        cursor = self._db.cursor()
+        cursor.execute("SELECT week_id, number FROM weeks WHERE year = %s;", (year,))
+        weeks = cursor.fetchall()
+
+        results = {}
+        for week in weeks:
+            weekly_selections = self.get_current_picks(week[1], year)
+            results[week[0]] = { "week": week[1], "users": {} }
+            # user_selections.draft_order, users.user_id, users.name, teams.team_id, teams.name
+            users = {x[2] for x in weekly_selections}
+            for user in users:
+                user_selections = [x for x in weekly_selections if x[2] == user]
+                results[week[0]]["users"][user] = user_selections
+
+        return results
+
+    def get_standings(self, year):
+        cursor = self._db.cursor()
+        cursor.execute("SELECT user_id, name FROM users;")
+        users = cursor.fetchall()
+
+        standings = []
+        for user in users:
+            user_info = self.get_user_info(user[0], year)
+            del user_info['draft_selections']
+            user_info["user_id"] = user[0]
+
+            total_games = user_info['wins'] + user_info['losses'] + user_info['ties']
+            if total_games == 0:
+                user_info['win_pct'] = 0.0
+            else:
+                user_info['win_pct'] = (
+                    (2 * user_info['wins'] + user_info['ties']) / 
+                    (2 * (user_info['wins'] + user_info['losses'] + user_info['ties']))
+                )
+
+            standings.append(user_info)
+
+        standings = sorted(standings, key=lambda x: x['win_pct'], reverse=True)
+        return standings
 
     def get_team_info(self, team_id):
         cursor = self._db.cursor()
@@ -392,10 +436,9 @@ class Database:
 
         results = (team_name, wins, losses, ties)
 
-        # Get schedule with wins & losses
+        # Get NLF schedule with scores
 
         return results
-
 
     def get_user_info(self, user_id, year=date.today().year):
         cursor = self._db.cursor()
@@ -412,13 +455,15 @@ class Database:
         # Get wins/losses of those selections
         picks = [{"team_id": info[3], "week": info[5], 'info': info} for info in selections if info[3] is not None]
         team_ids = {str(info[3]) for info in selections if info[3] is not None}
-        team_ids = ','.join(team_ids)
 
-        cursor.execute("SELECT week_id, home_team_id, away_team_id, winning_team_id, losing_team_id, tie \
-            FROM games \
-            WHERE home_team_id IN (%s) OR away_team_id IN (%s);" % (team_ids, team_ids)
-        )
-        results = cursor.fetchall()
+        results = []
+        if len(team_ids) > 0:
+            team_ids = ','.join(team_ids)
+            cursor.execute("SELECT week_id, home_team_id, away_team_id, winning_team_id, losing_team_id, tie \
+                FROM games \
+                WHERE home_team_id IN (%s) OR away_team_id IN (%s);" % (team_ids, team_ids)
+            )
+            results = cursor.fetchall()
 
         wins = 0
         losses = 0
@@ -453,6 +498,15 @@ class Database:
                 if games.count(games[0][3]) != len(games):
                     weekly_results.append(games)
 
+        #sort weekly_results by descending week number
+        weekly_results = sorted(weekly_results, key=lambda x: x[0], reverse=True)
+
+        if user_name is None:
+            cursor.execute("SELECT name FROM users WHERE user_id = %s;", (user_id,))
+            user_results = cursor.fetchone()
+            if user_results is not None:
+                user_name = user_results[0]
+
         return {
             "user_name": user_name,
             "draft_selections": weekly_results,
@@ -481,8 +535,20 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.populate:
-        # Determine users
-        users = ["Zachary Rahn", "Jeremy Rahn", "Jon Weiner", "Tom Shea", "Chris Stanziale", "Eugene Rapay"]
+        # Define users
+        users = [
+            "Zac Rahn",
+            "Jeremy Rahn",
+            "Jon Weiner",
+            "Tom Shea",
+            "Chris Stanziale",
+            "Nicky Stanziale",
+            "Pichael Stanziale",
+            "Eugene Rapay",
+            "Dillon Kelly",
+            "Jack Goldman",
+            "Nick Cabrese"
+        ]
         weeks = [w + 1 for w in range(18)]
 
         # Get the NFL teams
@@ -543,4 +609,3 @@ if __name__ == '__main__':
             bye_weeks[w] = [users[i] for i in range(random.randint(0, 3))]
 
         db.create_drafts(bye_weeks)
-  

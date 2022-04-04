@@ -116,6 +116,34 @@ def generate_pick_team_response(args):
     return jsonify({"success": True})
 
 
+def validate_season_picks_request(params):
+    if params.get('year') is None:
+        print("INFO: no 'year' attribute found in request. Adding the current year")
+        params['year'] = date.today().year
+
+
+def generate_season_picks_response(args):
+    '''
+    Returns a JSON response with the teams selected by week & user/player
+    '''
+    response = get_db().get_season_selections(args['year'])
+    return jsonify(response)
+
+
+def validate_standings_request(params):
+    if params.get('year') is None:
+        print("INFO: no 'year' attribute found in request. Adding the current year")
+        params['year'] = date.today().year
+
+
+def generate_standings_response(args):
+    '''
+    Returns a JSON response with NFL team information
+    '''
+    response = get_db().get_standings(args['year'])
+    return jsonify(response)
+
+
 def validate_team_data_request(params):
     if params.get('team_id') is None:
         print("ERROR: no 'team_id' attribute found in request.")
@@ -248,6 +276,26 @@ def api_pick_team():
     request_data = json.loads(request.data)
     validate_pick_team_request(request_data)
     return generate_pick_team_response(request_data)
+
+
+@app.route('/api/season_selections', methods=['GET'])
+def api_season_picks():
+    '''
+    Route for the API to get the league's picks for the entire season
+    '''
+    request_args = dict(request.args)
+    validate_season_picks_request(request_args)
+    return generate_season_picks_response(request_args)
+
+
+@app.route('/api/standings', methods=['GET'])
+def api_standings():
+    '''
+    Route for the API to get the standings of the league
+    '''
+    request_args = dict(request.args)
+    validate_standings_request(request_args)
+    return generate_standings_response(request_args)
 
 
 @app.route('/api/team_data', methods=['GET'])
